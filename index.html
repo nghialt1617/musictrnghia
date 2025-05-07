@@ -25,6 +25,14 @@
             box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
             width: 320px;
         }
+        #searchBox {
+            display: none;
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 10px;
+        }
         ul {
             list-style: none;
             padding: 0;
@@ -61,6 +69,7 @@
 <body>
     <div class="player">
         <h2>Nghe nhạc cùng KeThuaCuoc</h2>
+        <input type="text" id="searchBox" placeholder="Tìm bài hát...">
         <button id="togglePlaylist">Chọn bài hát</button>
         <ul id="playlist"></ul>
         <audio id="audioPlayer" controls style="margin-top: 15px; width: 100%;"></audio>
@@ -70,6 +79,8 @@
         const playlist = document.getElementById('playlist');
         const audioPlayer = document.getElementById('audioPlayer');
         const toggleButton = document.getElementById('togglePlaylist');
+        const searchBox = document.getElementById('searchBox');
+
         const tracks = [
             { name: "Âm Thầm Bên Em", url: "music/amthambenem.mp3" },
             { name: "3107-1", url: "music/3107-1.mp3" },
@@ -79,23 +90,38 @@
             { name: "Trả Cho Em", url: "music/trachoem.mp3" }
         ];
 
-        tracks.forEach((track, index) => {
-            const li = document.createElement('li');
-            li.textContent = track.name;
-            li.dataset.index = index;
-            li.addEventListener('click', () => playTrack(index));
-            playlist.appendChild(li);
-        });
+        function renderPlaylist(filter = '') {
+            playlist.innerHTML = '';tracks.forEach((track, index) => {
+                if (track.name.toLowerCase().includes(filter.toLowerCase())) {
+                    const li = document.createElement('li');
+                    li.textContent = track.name;
+                    li.dataset.index = index;
+                    li.addEventListener('click', () => playTrack(index));
+                    playlist.appendChild(li);
+                }
+            });
+        }
 
-        toggleButton.addEventListener('click', () => {
-            playlist.style.display = playlist.style.display === 'none' ? 'block' : 'none';
-        });
-
-        function playTrack(index) {audioPlayer.src = tracks[index].url;
+        function playTrack(index) {
+            audioPlayer.src = tracks[index].url;
             audioPlayer.play();
             document.querySelectorAll('#playlist li').forEach(li => li.classList.remove('playing'));
-            playlist.children[index].classList.add('playing');
+            const selected = [...playlist.children].find(li => li.dataset.index == index);
+            if (selected) selected.classList.add('playing');
         }
+
+        toggleButton.addEventListener('click', () => {
+            const isVisible = playlist.style.display === 'block';
+            playlist.style.display = isVisible ? 'none' : 'block';
+            searchBox.style.display = isVisible ? 'none' : 'block';
+        });
+
+        searchBox.addEventListener('input', () => {
+            renderPlaylist(searchBox.value);
+        });
+
+        // Khởi tạo danh sách
+        renderPlaylist();
     </script>
 </body>
 </html>
